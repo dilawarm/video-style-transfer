@@ -6,8 +6,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
-from cv2 import calcOpticalFlowPyrLK
-
 from model import StyleContentModel
 from preprocessing import (
     load_img,
@@ -19,17 +17,23 @@ from preprocessing import (
 )
 from utils import total_variation_loss
 
+TOL = 0.05
+loss_tolerance = 10000
+
 mpl.rcParams["figure.figsize"] = (12, 12)
 mpl.rcParams["axes.grid"] = False
 
 
-def loss_function(prev, outputs):
+def loss_function(last_image, outputs):
     """
+    :param last_image: the previous generated frame
     :param outputs: Generated image
     :return: The sum of the style and content loss
     """
     style_outputs = outputs["style"]
     content_outputs = outputs["content"]
+    last_image_outputs = last_image
+
     style_loss = tf.add_n(
         [
             tf.reduce_mean((style_outputs[name] - style_targets[name]) ** 2)
@@ -46,36 +50,48 @@ def loss_function(prev, outputs):
     )
     content_loss *= content_weight / num_content_layers
 
-    loss = style_loss + content_loss
+    # last_image, outputs (cur_image) -->
+    temporal_loss = tf.add_n([tf.reduce_mean((last_image - content_outputs) ** 2)])
+    temporal_loss *= temporal_weight
+
+    loss = style_loss + content_loss + temporal_loss
     return loss
 
 
 @tf.function()
-def train_step(image):
+def train_step(last_image, image):
     """
+    :param last_image: the previous frame generated
     :param image: Input image
+    :return: the current image after the training step
     """
-
+    done = False
     with tf.GradientTape() as tape:
         outputs = extractor(image)
-        loss = loss_function(prev, outputs)
+        loss = loss_function(last_image, outputs)
         loss += total_variation_weight * tf.image.total_variation(image)
-
     grad = tape.gradient(loss, image)
     opt.apply_gradients([(grad, image)])
     image.assign(clip_0_1(image))
+
+    if len(losses) > 0 and abs(loss.numpy() - losses[-1].numpy()) < loss_tolerance:
+        done = True
+
+    losses.append(loss)
+
+    return image, done
 
 
 if __name__ == "__main__":
     style_path = "images/style.jpg"
     style_image = load_img(style_path)
 
-    images = load_video("videos/cat3.mp4")
+    images = load_video("videos/cat2.mp4")
 
     styled_images = []
+    losses = []
     start = time.time()
 
-    print(f"Total images = {len(images)}")
     for idx, img in enumerate(images):
 
         content_image = img
@@ -98,15 +114,18 @@ if __name__ == "__main__":
         style_targets = extractor(style_image)["style"]
         content_targets = extractor(content_image)["content"]
 
-        image = tf.Variable(content_image)
-
         opt = tf.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
 
         style_weight = 1e-2
         content_weight = 1e4
-        temporal_weight = 1e-2
+        temporal_weight = 1  # random veri bare, vi må teste ut ulike verdier for den
 
         total_variation_weight = 30
+
+        if len(styled_images) > 0:
+            content_image = tf.where(
+                content_image - images[idx - 1] < TOL, styled_images[-1], content_image
+            )
 
         image = tf.Variable(content_image)
 
@@ -116,15 +135,27 @@ if __name__ == "__main__":
         steps_per_epoch = 100
 
         step = 0
+
+        optim_done = False
         for n in range(epochs):
+            if optim_done:
+                break
             for m in range(steps_per_epoch):
                 step += 1
-
-                train_step(image)
+                prev = (
+                    None if idx == 0 else styled_images[idx - 1]
+                )  # forrige genererte frame om vi har noen
+                tempimg, done = train_step(prev, image)
+                if done:
+                    optim_done = True
+                    break
                 print(".", end="")
+            display.clear_output(wait=True)
+            display.display(tensor_to_image(image))
             print("Train step: {}".format(step))
 
         end = time.time()
+        print("Total time: {:.1f}".format(end - start))
         print(f"{idx+1}/{len(images)} frames processed")
 
         styled_images.append(image)
