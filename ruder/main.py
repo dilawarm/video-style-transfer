@@ -5,6 +5,7 @@ import IPython.display as display
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import cv2
 
 from model import StyleContentModel
 from preprocessing import (
@@ -24,15 +25,15 @@ mpl.rcParams["figure.figsize"] = (12, 12)
 mpl.rcParams["axes.grid"] = False
 
 
-def loss_function(last_image, outputs):
+def loss_function(prev, image, idx, warped_image):
     """
     :param last_image: the previous generated frame
     :param outputs: Generated image
     :return: The sum of the style and content loss
     """
+    outputs = extractor(image)
     style_outputs = outputs["style"]
     content_outputs = outputs["content"]
-    last_image_outputs = last_image
 
     style_loss = tf.add_n(
         [
@@ -50,16 +51,16 @@ def loss_function(last_image, outputs):
     )
     content_loss *= content_weight / num_content_layers
 
-    # last_image, outputs (cur_image) -->
-    temporal_loss = tf.add_n([tf.reduce_mean((last_image - content_outputs) ** 2)])
-    temporal_loss *= temporal_weight
+    temporal_loss = 0
+    if idx > 0:
+        temporal_loss = tf.add_n([tf.reduce_mean((image - warped_image) ** 2)])
+        temporal_loss *= temporal_weight
 
     loss = style_loss + content_loss + temporal_loss
     return loss
 
 
-@tf.function()
-def train_step(last_image, image):
+def train_step(prev, image, idx):
     """
     :param last_image: the previous frame generated
     :param image: Input image
@@ -67,8 +68,9 @@ def train_step(last_image, image):
     """
     done = False
     with tf.GradientTape() as tape:
-        outputs = extractor(image)
-        loss = loss_function(last_image, outputs)
+        if idx > 0:
+            warped_image = tf.tfa.image.dense_image_warp(image, flow[idx - 1])
+        loss = loss_function(image, warped_image, idx)
         loss += total_variation_weight * tf.image.total_variation(image)
     grad = tape.gradient(loss, image)
     opt.apply_gradients([(grad, image)])
@@ -86,7 +88,7 @@ if __name__ == "__main__":
     style_path = "images/style.jpg"
     style_image = load_img(style_path)
 
-    images = load_video("videos/cat2.mp4")
+    images, flow = load_video("videos/cat3.mp4")
 
     styled_images = []
     losses = []
@@ -118,7 +120,7 @@ if __name__ == "__main__":
 
         style_weight = 1e-2
         content_weight = 1e4
-        temporal_weight = 1  # random veri bare, vi må teste ut ulike verdier for den
+        temporal_weight = 1e5  # random veri bare, vi må teste ut ulike verdier for den
 
         total_variation_weight = 30
 
@@ -132,6 +134,7 @@ if __name__ == "__main__":
         start = time.time()
 
         epochs = 10
+
         steps_per_epoch = 100
 
         step = 0
@@ -142,10 +145,11 @@ if __name__ == "__main__":
                 break
             for m in range(steps_per_epoch):
                 step += 1
-                prev = (
-                    None if idx == 0 else styled_images[idx - 1]
-                )  # forrige genererte frame om vi har noen
-                tempimg, done = train_step(prev, image)
+                prev = 0
+                if idx > 0:
+                    prev = styled_images[-1]
+
+                tempimg, done = train_step(prev, image, idx)
                 if done:
                     optim_done = True
                     break

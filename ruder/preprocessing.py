@@ -44,24 +44,44 @@ def load_img(path_to_img):
     return img
 
 
+def get_flow(image1, image2):
+    return cv2.calcOpticalFlowFarneback(
+        cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY),
+        cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY),
+        None,
+        0.5,
+        3,
+        15,
+        3,
+        5,
+        1.2,
+        0,
+    )
+
+
 def load_video(path_to_video):
     vidcap = cv2.VideoCapture(path_to_video)
     sec = 0
     count = 0
     success = getFrame(sec, vidcap)
     images = []
+    flow = []
     while success:
         count += 1
         sec += frame_interval
         sec = round(sec, 2)
         success, image = getFrame(sec, vidcap)
+        prevImage = None
         if success:
+            if prevImage:
+                flow.append(get_flow(prevImage, image))
             image_path = str(count) + ".jpg"
             cv2.imwrite(image_path, image)
             images.append(load_img(image_path))
             check_output(f"rm -rf {image_path}".split())
+            prevImage = image
 
-    return images
+    return images, flow
 
 
 def convert_to_video(images):
