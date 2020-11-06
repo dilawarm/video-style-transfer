@@ -15,9 +15,11 @@ from preprocessing import (
     tensor_to_image,
     load_video,
     convert_to_video,
+    get_flow,
 )
 from utils import total_variation_loss
 
+frame_interval = 0.1
 TOL = 0.05
 loss_tolerance = 10000
 
@@ -25,7 +27,7 @@ mpl.rcParams["figure.figsize"] = (12, 12)
 mpl.rcParams["axes.grid"] = False
 
 
-def loss_function(prev, image, idx, warped_image):
+def loss_function(image, idx, c, omega):
     """
     :param last_image: the previous generated frame
     :param outputs: Generated image
@@ -53,14 +55,14 @@ def loss_function(prev, image, idx, warped_image):
 
     temporal_loss = 0
     if idx > 0:
-        temporal_loss = tf.add_n([tf.reduce_mean((image - warped_image) ** 2)])
+        temporal_loss = tf.add_n([tf.reduce_mean((image - omega) ** 2)])
         temporal_loss *= temporal_weight
 
     loss = style_loss + content_loss + temporal_loss
     return loss
 
 
-def train_step(prev, image, idx):
+def train_step(image, omega, c, idx):
     """
     :param last_image: the previous frame generated
     :param image: Input image
@@ -68,9 +70,8 @@ def train_step(prev, image, idx):
     """
     done = False
     with tf.GradientTape() as tape:
-        if idx > 0:
-            warped_image = tf.tfa.image.dense_image_warp(image, flow[idx - 1])
-        loss = loss_function(image, warped_image, idx)
+        warped_image = 0
+        loss = loss_function(image, idx, c, omega)
         loss += total_variation_weight * tf.image.total_variation(image)
     grad = tape.gradient(loss, image)
     opt.apply_gradients([(grad, image)])
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     style_path = "images/style.jpg"
     style_image = load_img(style_path)
 
-    images, flow = load_video("videos/cat3.mp4")
+    images, warped = load_video("videos/cat3.mp4")
 
     styled_images = []
     losses = []
@@ -120,20 +121,69 @@ if __name__ == "__main__":
 
         style_weight = 1e-2
         content_weight = 1e4
-        temporal_weight = 1e5  # random veri bare, vi må teste ut ulike verdier for den
+        temporal_weight = 4e4  # random veri bare, vi må teste ut ulike verdier for den
 
         total_variation_weight = 30
 
+        """
         if len(styled_images) > 0:
             content_image = tf.where(
                 content_image - images[idx - 1] < TOL, styled_images[-1], content_image
             )
+        """
+
+        c = tf.zeros(image.shape)
+        omega = 0
+        if len(styled_images) > 0:
+            flow = tf.convert_to_tensor(
+                [
+                    get_flow(
+                        images[idx - 1][0].numpy() * 255, images[idx][0].numpy() * 255
+                    )
+                ]
+            )
+            backward_flow = tf.convert_to_tensor(
+                [
+                    get_flow(
+                        images[idx][0].numpy() * 255, images[idx - 1][0].numpy() * 255
+                    )
+                ]
+            )
+
+            average_flow = np.zeros(flow.shape)
+            flow = flow.numpy()
+            backward_flow = backward_flow.numpy()
+
+            for x in range(len(flow[0])):
+                for y in range(len(flow[0][x])):
+                    x_index = int(round(x + backward_flow[0][x][y][0]))
+                    y_index = int(round(y + backward_flow[0][x][y][1]))
+                    if x_index < len(flow[0]) and y_index < len(flow[0][x]):
+                        average_flow[0][x][y] = flow[0][
+                            int(round(x + backward_flow[0][x][y][0]))
+                        ][int(round(y + backward_flow[0][x][y][1]))]
+
+            c = tf.where(
+                (
+                    abs(average_flow + backward_flow) ** 2
+                    > 0.01 * (abs(average_flow) ** 2 + abs(backward_flow) ** 2) + 0.5
+                ),
+                tf.zeros(average_flow.shape),
+                tf.ones(average_flow.shape),
+            )
+
+            omega = tfa.image.dense_image_warp(styled_images[-1], average_flow)
+
+        print("content to warped")
+        display.display(tensor_to_image(images[idx - 1]))
+        display.display(tensor_to_image(images[idx]))
+        display.display(tensor_to_image(omega))
 
         image = tf.Variable(content_image)
 
         start = time.time()
 
-        epochs = 10
+        epochs = 4
 
         steps_per_epoch = 100
 
@@ -149,20 +199,19 @@ if __name__ == "__main__":
                 if idx > 0:
                     prev = styled_images[-1]
 
-                tempimg, done = train_step(prev, image, idx)
+                tempimg, done = train_step(image, omega, c, idx)
                 if done:
                     optim_done = True
                     break
                 print(".", end="")
-            display.clear_output(wait=True)
-            display.display(tensor_to_image(image))
             print("Train step: {}".format(step))
 
         end = time.time()
         print("Total time: {:.1f}".format(end - start))
+        display.display(tensor_to_image(image))
         print(f"{idx+1}/{len(images)} frames processed")
 
         styled_images.append(image)
 
-    print("Total time: {:.1f}".format(end - start))
+    # print("Total time: {:.1f}".format(end - start))
     convert_to_video(styled_images)

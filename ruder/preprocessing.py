@@ -46,8 +46,8 @@ def load_img(path_to_img):
 
 def get_flow(image1, image2):
     return cv2.calcOpticalFlowFarneback(
-        cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY),
-        cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY),
+        cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY),
+        cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY),
         None,
         0.5,
         3,
@@ -65,23 +65,34 @@ def load_video(path_to_video):
     count = 0
     success = getFrame(sec, vidcap)
     images = []
-    flow = []
+    warped = []
+    prevImage = None
     while success:
         count += 1
         sec += frame_interval
         sec = round(sec, 2)
         success, image = getFrame(sec, vidcap)
-        prevImage = None
         if success:
-            if prevImage:
-                flow.append(get_flow(prevImage, image))
             image_path = str(count) + ".jpg"
             cv2.imwrite(image_path, image)
+            """
+            if count > 1:
+                warped_path = str(count + 10) + ".jpg"
+
+                imageTensor = tf.convert_to_tensor([image], dtype=tf.float32)
+                warpedTensor = tf.convert_to_tensor([get_flow(prevImage, image)], dtype=tf.float32)
+
+                warped_image = tfa.image.dense_image_warp(imageTensor, warpedTensor)
+                warped_image = tf.math.round(warped_image[0])
+                cv2.imwrite(warped_path, warped_image.numpy())
+                warped.append(load_img(warped_path))
+                check_output(f"rm -rf {warped_path}".split())
+            """
             images.append(load_img(image_path))
             check_output(f"rm -rf {image_path}".split())
             prevImage = image
 
-    return images, flow
+    return images, warped
 
 
 def convert_to_video(images):
