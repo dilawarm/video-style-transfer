@@ -136,3 +136,14 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+data
+checkpoints
+models
+pre_trained_model
+style
+styled_videos
+videos
+images
+stylized_videos
+stylized_images
