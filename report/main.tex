@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{subfiles}
+\usepackage{graphicx}
+\usepackage{nomencl}
+\usepackage{caption}
+
+\title{%
+  Video Style Transfer \\
+  \large Machine Learning Project in TDAT3025}
+\author{Tobias Andersen, Kjerand Evje, Dilawar Mahmood, \\Håvard Stavnås Markhus}
+\date{Fall 2020}
+
+\usepackage[nottoc]{tocbibind}
+
+\begin{document}
+\subfile{report/frontpage}
+\tableofcontents
+\newpage
+\section{Introduction}
+"uvanlig" innledning ;)
+\section{Background}
+\subfile{Background/main}
+\section{Method}
+\subfile{Method/Gatys.tex}
+\subfile{Method/Ruder.tex}
+\subfile{Method/ColorPreservation.tex}
+\section{Results}
+youtube-videoer
+\section{Discussion}
+\subfile{Discussion.tex}
+\section{Conclusion}
+vanlig konklusjon
+\bibliography{.bib} 
+\bibliographystyle{ieeetr}
+\end{document}
