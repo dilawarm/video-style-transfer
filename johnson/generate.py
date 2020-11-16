@@ -74,9 +74,10 @@ def main():
             write(tot)
 
     end_time = time.time()
-    print(f"Execution time {end_time - start_time}")
 
     convert_to_video(styled)
+
+    print(f"Execution time {end_time - start_time}")
     print("The video has been styled!")
 
 
