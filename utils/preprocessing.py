@@ -5,13 +5,6 @@ import PIL.Image
 import tensorflow as tf
 from subprocess import check_output
 
-
-def high_pass_x_y(image):
-    x_var = image[:, :, 1:, :] - image[:, :, :-1, :]
-    y_var = image[:, 1:, :, :] - image[:, :-1, :, :]
-
-    return x_var, y_var
-
 def getFrame(sec, vidcap):
     vidcap.set(cv2.CAP_PROP_POS_MSEC, sec * 1000)
     hasFrames, image = vidcap.read()

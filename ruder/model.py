@@ -1,14 +1,10 @@
 import tensorflow as tf
 
-from utils import gram_matrix, vgg_layers
+from utils import vgg_layers, gram_matrix
 
 
 class StyleContentModel(tf.keras.models.Model):
     def __init__(self, style_layers, content_layers):
-        """
-        :param style_layers: Intermediate layers for style
-        :param content_layers: Intermediate layers for content
-        """
         super(StyleContentModel, self).__init__()
         self.vgg = vgg_layers(style_layers + content_layers)
         self.style_layers = style_layers
@@ -17,10 +13,7 @@ class StyleContentModel(tf.keras.models.Model):
         self.vgg.trainable = False
 
     def call(self, inputs):
-        """
-        :param inputs: An image. Expects flat input in [0, 1]
-        :return: Style and content tensors
-        """
+        "Expects float input in [0,1]"
         inputs = inputs * 255.0
         preprocessed_input = tf.keras.applications.vgg19.preprocess_input(inputs)
         outputs = self.vgg(preprocessed_input)
@@ -41,4 +34,5 @@ class StyleContentModel(tf.keras.models.Model):
             for style_name, value in zip(self.style_layers, style_outputs)
         }
 
-        return {"content": content_dict, "style": style_dict, "raw": inputs}
+        return {"content": content_dict, "style": style_dict}
+
