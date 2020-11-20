@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{nomencl}
 \usepackage{caption}
+\usepackage{amssymb}
 
 \title{%
   Video Style Transfer \\
@@ -20,19 +21,22 @@
 \tableofcontents
 \newpage
 \section{Introduction}
-"uvanlig" innledning ;)
-\section{Background}
+\subfile{Introduction.tex}
+\section{Related work}
 \subfile{Background/main}
 \section{Method}
+\subfile{Method/intro.tex}
 \subfile{Method/Gatys.tex}
 \subfile{Method/Ruder.tex}
+\subfile{Method/Johnson.tex}
+\subfile{Method/huang.tex}
 \subfile{Method/ColorPreservation.tex}
 \section{Results}
-youtube-videoer
+\subfile{Result/main}
 \section{Discussion}
 \subfile{Discussion.tex}
 \section{Conclusion}
-vanlig konklusjon
+\subfile{Conclusion.tex}
 \bibliography{.bib} 
 \bibliographystyle{ieeetr}
 \end{document}

@@ -1,0 +1,10 @@
+\subsection{Results with image transformation network}
+\label{seq:johnson_result}
+As discussed in Section \ref{seq:johnson_method}, our custom implementation of the algorithm presented by Johnson et al \cite{Johnson:1} made the stylizing of the videos very fast, because only have to do one forward-pass for each frame in the video. To repeat, our custom version of the implementation is that we use instance normalization instead of batch normalization to speed up the training, and to reduce some noise in the stylized image. This enabled us to make 30 fps videos, and here are the results:
+\begin{itemize}
+\item{Shrek styled with Udnie: \url{https://youtu.be/WpieLh8e16w}}
+\item{Shrek styled with Picasso: \url{https://youtu.be/1IC4peunvYw}}
+\item{Parasite styled with Udnie: \url{https://youtu.be/krjY1u1vZc4}}
+\item{Parasite styled with Picasso: \url{https://youtu.be/k9pVJifZrGI}}
+\end{itemize}
+As we can see, there is little to none flickering and noise in the videos, and the quality of the videos are pleasing. The frames are styled independently of each other, as opposed to the implementations with temporal constraint and Wasserstein distance. The content weight used here is $7.5$, style weight is $500,$ and the total variation loss weight is $200$.

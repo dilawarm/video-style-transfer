@@ -1,0 +1,9 @@
+\subsection{AdaIN}
+Another quite known method of style transfer is AdaIN, short for Adaptive Instance Normalization. It was implemented in the paper by Huang \textit{et al.} \cite{X.Huang:1}. AdaIN is an extension of Instance Normalization, which we have described more in detail in Section \ref{sec:instance_normalization}. With AdaIN you need two normalized inputs: $x$, the image input and $y$, the style input. Then the method simply aligns the channel-wise variance and mean of $x$ to match $y$. The formula is as following: 
+\begin{equation}
+\begin{aligned}
+\label{eq:batch_normalization}
+    AdaIN(x,y)&=\sigma(y) \frac{x-\mu(x)}{\sigma(x)}+\mu(y),
+\end{aligned}
+\end{equation}
+where $\sigma(y)$ is used to scale the content input and $\mu(y)$ is used to shift it. The purpose of the AdaIN layer is to perform style transfer by using the mean and variance of the features. Because AdaIN is just a simple layer on top of an IN, it requires almost no extra computation. This makes AdaIN style transfer very fast compared to other tradional methods such as Gatys. This is the reason it is used for real-time style transfer in the paper of Huang \textit{et al.} mentioned above. 
