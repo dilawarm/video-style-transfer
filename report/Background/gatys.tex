@@ -1,9 +1,11 @@
 \subsection{A neural algorithm of artistic style}
+\label{sec:gatys}
 \textit{A neural algorithm of artistic style} is a paper written by Gatys et al. \cite{Gatys:1}. This paper goes into depth about how to use a feature space from a convolutional neural network to generate images with a given style. To generate an image with a given style can be framed as an optimization problem, where we want to make the generated image look like the content image, but with the style of the style image. This optimization is done by using the gradient descent algorithm.
 \subsubsection{The VGG-network}
+\label{sec:vgg}
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[scale=0.30]{report/Background/images/vgg19.png}
+\includegraphics[scale=0.20]{report/Background/images/vgg19.png}
 \caption{The VGG-19 network}
 \label{fig:rotasjon}
 \end{center}
@@ -13,10 +15,12 @@ Let $\vec{p}$ be the content image (the image we want to style), and the $\vec{x
 \subsubsection{Loss functions}
 Since one of the goals of the optimization is to make $P^l$ similar to $F^l$, i.e. making the generated image like the original content image, Gatys et. al defined the following loss function, the content loss, between the two feature representations described above:
 \begin{equation}
+\label{eq:content_loss}
     \mathcal{L}_\text{content}(\vec{p},\vec{x},l)=\frac{1}{2}\sum_{i,j}{(F_{ij}^l-P_{ij}^l)^2},
 \end{equation}
 where $F_{i,j}$ and $P_{i,j}$ are the activations of the $i$th filter at position $j$ in layer $l$. This loss function is the squared-error loss function. Similarly, they defined the style loss as follows:
 \begin{equation}
+\label{eq:style_loss}
     \mathcal{L}_\text{style}(\vec{a},\vec{x})=\sum_{l=0}^L{w_lE_l},
 \end{equation}
 where
@@ -25,8 +29,10 @@ where
 \end{equation}
 Here $A^l$ is the is the style representation of the style image in layer $l$, and $G^l$ is the style representation of the the generated image. $\vec{a}$ is the style image, and $w_l$ are the weighting factors for how much each layer should contribute to the total loss. $G^l$ is also known as the Gram matrix. This matrix will be discussed in Section \ref{section:gram}. Now, the total loss can be written as:
 \begin{equation}
+\label{eq:total_loss}
     \mathcal{L}_\text{total}(\vec{p}, \vec{a}, \vec{x})=\alpha\mathcal{L}_\text{content}(\vec{p},\vec{x})+\beta\mathcal{L}_\text{style}(\vec{a},\vec{x})
 \end{equation}
+Here, $\alpha$ and $\beta$ are weights for the content image and the style image. The higher the weight, the more that loss is minimized, resulting in the stylized image to either be more equal to the content image, or the style image.
 \subsubsection{Gram Matrix}
 \label{section:gram}
 \begin{figure}[!ht]
@@ -58,4 +64,3 @@ The derivative of $E_l$ is given by
     \end{cases}
 \end{equation}
 The gradients can be calculated by using standard-error back-propagation, as described by Gatys et al.
-\newpage
