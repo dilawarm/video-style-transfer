@@ -142,8 +142,11 @@ checkpoints
 models
 pre_trained_model
 style
-styled_videos
-videos
-images
-stylized_videos
-stylized_images
+
+videos/*
+images/*
+stylized_videos/*
+
+!videos/.gitkeep
+!images/.gitkeep
+!stylized_videos/.gitkeep
