@@ -4,29 +4,6 @@ import tensorflow as tf
 import numpy as np
 import scipy.io
 
-MODEL_FILE_NAME = "imagenet-vgg-verydeep-19.mat"
-
-
-def conv_layer(input, weights, bias):
-    conv = tf.nn.conv2d(
-        input, tf.constant(weights), strides=(1, 1, 1, 1), padding="SAME"
-    )
-    return tf.nn.bias_add(conv, bias)
-
-
-def pool_layer(input):
-    return tf.nn.max_pool(
-        input, ksize=(1, 2, 2, 1), strides=(1, 2, 2, 1), padding="SAME"
-    )
-
-
-def preprocess(image, mean_pixel):
-    return image - mean_pixel
-
-
-def undo_preprocess(image, mean_pixel):
-    return image + mean_pixel
-
 
 class VGG19:
     layers = (
@@ -102,5 +79,25 @@ class VGG19:
                     current = pool_layer(current)
                 net[name] = current
 
-        assert len(net) == len(self.layers)
         return net
+
+
+def conv_layer(input, weights, bias):
+    conv = tf.nn.conv2d(
+        input, tf.constant(weights), strides=(1, 1, 1, 1), padding="SAME"
+    )
+    return tf.nn.bias_add(conv, bias)
+
+
+def pool_layer(input):
+    return tf.nn.max_pool(
+        input, ksize=(1, 2, 2, 1), strides=(1, 2, 2, 1), padding="SAME"
+    )
+
+
+def preprocess(image, mean_pixel):
+    return image - mean_pixel
+
+
+def undo_preprocess(image, mean_pixel):
+    return image + mean_pixel

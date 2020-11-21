@@ -5,7 +5,7 @@ import vgg19
 import os
 import style_transfer
 
-VGG_MODEL = "pre_trained_model"
+VGG_MODEL = "pre_trained_model/imagenet-vgg-verydeep-19.mat"
 TRAINDB_PATH = "../../../media/datasets/train2014"
 STYLE = "style/vangogh.jpg"
 OUTPUT = "models"
@@ -22,7 +22,6 @@ STYLE_LAYER_WEIGHTS = [0.2, 0.2, 0.2, 0.2, 0.2]
 LEARN_RATE = 1e-3
 NUM_EPOCHS = 2
 BATCH_SIZE = 4
-CHECKPOINT_EVERY = 1000
 
 tf.compat.v1.disable_eager_execution()
 
@@ -33,7 +32,7 @@ def add_one_dim(image):
 
 
 def main():
-    model_file_path = VGG_MODEL + "/" + vgg19.MODEL_FILE_NAME
+    model_file_path = VGG_MODEL
     vgg_net = vgg19.VGG19(model_file_path)
 
     content_images = utils.get_files(TRAINDB_PATH)
@@ -52,7 +51,7 @@ def main():
         config=tf.compat.v1.ConfigProto(allow_soft_placement=True)
     )
 
-    trainer = style_transfer.StyleTransferTrainer(
+    trainer = style_transfer.Optimizer(
         session=sess,
         content_layer_ids=CONTENT_LAYERS_DICT,
         style_layer_ids=STYLE_LAYERS_DICT,
@@ -66,7 +65,6 @@ def main():
         tv_weight=TV_WEIGHT,
         learn_rate=LEARN_RATE,
         save_path=OUTPUT,
-        check_period=CHECKPOINT_EVERY,
     )
 
     trainer.train()
@@ -76,4 +74,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print("Training finished.")
+    print("Training finished!")

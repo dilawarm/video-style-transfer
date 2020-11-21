@@ -7,7 +7,7 @@ import transform
 import utils
 
 
-class StyleTransferTrainer:
+class Optimizer:
     def __init__(
         self,
         content_layer_ids,
@@ -23,7 +23,6 @@ class StyleTransferTrainer:
         tv_weight,
         learn_rate,
         save_path,
-        check_period,
     ):
 
         self.net = net
@@ -44,15 +43,11 @@ class StyleTransferTrainer:
         self.tv_weight = tv_weight
         self.learn_rate = learn_rate
         self.batch_size = batch_size
-        self.check_period = check_period
 
         self.save_path = save_path
 
-        self.transform = transform.Transform()
+        self.transform = transform.ImageTransformationNetwork()
 
-        self.build_graph()
-
-    def build_graph(self):
         self.batch_shape = (self.batch_size, 256, 256, 3)
 
         self.y_c = tf.compat.v1.placeholder(
@@ -95,7 +90,6 @@ class StyleTransferTrainer:
                     w,
                     d,
                 ) = F.get_shape()
-                b = b
                 N = h * w
                 M = d
 
@@ -112,7 +106,6 @@ class StyleTransferTrainer:
                     w,
                     d,
                 ) = F.get_shape()
-                b = b
                 N = h * w
                 M = d
 
@@ -141,10 +134,6 @@ class StyleTransferTrainer:
 
     def total_variation_loss(self, img):
         b, h, w, d = img.get_shape()
-        b = b
-        h = h
-        w = w
-        d = d
         tv_y_size = (h - 1) * w * d
         tv_x_size = h * (w - 1) * d
         y_tv = tf.nn.l2_loss(img[:, 1:, :, :] - img[:, : self.batch_shape[1] - 1, :, :])
@@ -169,29 +158,10 @@ class StyleTransferTrainer:
 
         saver = tf.compat.v1.train.Saver()
 
-        checkpoint_exists = True
-        try:
-            ckpt_state = tf.compat.v1.train.get_checkpoint_state(self.save_path)
-        except tf.errors.OutOfRangeError as e:
-            print(f"Cannot restore checkpoint: {e}")
-            checkpoint_exists = False
-        if not (ckpt_state and ckpt_state.model_checkpoint_path):
-            print(f"No model to restore at {self.save_path}")
-            checkpoint_exists = False
-
-        if checkpoint_exists:
-            tf.logging.info(f"Loading checkpoint {ckpt_state.model_checkpoint_path}")
-            saver.restore(self.sess, ckpt_state.model_checkpoint_path)
-
         num_examples = len(self.x_list)
 
-        if checkpoint_exists:
-            iterations = self.sess.run(global_step)
-            epoch = (iterations * self.batch_size) // num_examples
-            iterations = iterations - epoch * (num_examples // self.batch_size)
-        else:
-            epoch = 0
-            iterations = 0
+        epoch = 0
+        iterations = 0
 
         while epoch < self.num_epochs:
             while iterations * self.batch_size < num_examples:
@@ -203,8 +173,6 @@ class StyleTransferTrainer:
                     x_batch[j] = utils.get_img(img_p, (256, 256, 3)).astype(np.float32)
 
                 iterations += 1
-
-                assert x_batch.shape[0] == self.batch_size
 
                 _, L_total, L_content, L_style, L_tv, step = self.sess.run(
                     [
@@ -223,13 +191,10 @@ class StyleTransferTrainer:
                     f"L_total : {L_total}, L_content : {L_content}, L_style : {L_style}, L_tv : {L_tv}"
                 )
 
-                if step % self.check_period == 0:
-                    res = saver.save(self.sess, self.save_path + "/final.ckpt", step)
-
             epoch += 1
             iterations = 0
         print("Saving final model...")
-        res = saver.save(self.sess, self.save_path + "/final.ckpt")
+        _ = saver.save(self.sess, self.save_path + "/final.ckpt")
 
     def gram_matrix(self, tensor, shape=None):
 

@@ -3,7 +3,7 @@
 import tensorflow as tf
 
 
-class Transform:
+class ImageTransformationNetwork:
     def __init__(self):
         self.reuse = None
 

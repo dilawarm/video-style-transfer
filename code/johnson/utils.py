@@ -1,3 +1,7 @@
+# Koden er basert på # borrowed from https://github.com/lengstrom/fast-style-transfer/blob/master/src/utils.py
+# og
+# https://github.com/Hvass-Labs/TensorFlow-Tutorials/blob/master/15_Style_Transfer.ipynb
+
 import numpy as np
 import PIL.Image
 import os
