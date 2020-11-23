@@ -1,0 +1,19 @@
+\begin{center}
+\section*{Weekly Summary}
+\end{center}
+\textbf{Week 43 \& 44:} \newline
+The first two weeks were spent reading background literature about style transfer in general. This topic was new to us so we had to take it from the start and study standard image style transfer in detail before proceeding.\newline\newline
+After studying the literature, we decided which papers we wanted to base our paper on. We ended up with the papers of Gatys, Ruder and Johnson. The first paper we decided on was the paper by Gatys. This is the original paper for style transfer using machine learning, and it is also the basis for many of the other papers. What we want to do is the implement his version of style transfer, but to also turn it into video style transfer.\newline\newline
+The second paper is the one by Ruder. This paper focuses on an implementation of video style transfer, which is also based on Gatys. This one is quite bit more advanced as it also uses a temporal constraint on the video and it uses Deepflow.\newline\newline
+The last paper is the one by Johnson. This paper has an implementation of video style transfer which is quite different from the two other papers. Here they train the model on one single style. This means you can only have one style, but it allows it to compute much faster.\newline\newline
+These are the papers we decided on basing our paper on. These first two weeks mostly just went into reading these papers and doing some planning for what we wanted to do in this project.
+\newline\newline
+\textbf{Week 45:} \newline
+This week we have implemented the most common form of image style transfer, first described in Gatys et. al. paper \cite{Gatys:1}. Following this we implemented its naive version of video transfer, which is to generate each frame separately as images and concatenate them in a video in the end. After this we wanted to explore techniques that were made to create videos, so we implemented Ruder et al.'s algorithm. This took quite a while, as especially the flow calculations took a lot of time to get right.\newline\newline
+By the end of the week we also started implementing our custom Johnson et. al's neural net approximation of Gatys paper with instance normalization from Ulynaov's paper. We also looked at another paper co-authored by Gatys, which looked at color preservation. We spent a day implementing this as our first renders used the famous Van Gogh "Starry Night" as style, and the videos produced seemed to be way too much affected by the color.
+\newline\newline
+\textbf{Week 46:} \newline
+This was the last week of pure implementation. We studied the paper by Huang et. al. Implementing the Wasserstein distance was quite difficult, we spent a lot of time trying to get the math right. To take it in our own direction, we read some more papers and landed on implementing Ruder et al.'s paper \cite{Ruder:1} but using the superior loss-function from Huangs paper.
+\newline\newline
+\textbf{Week 47:} \newline
+The last week we generated a bunch of different videos. We tested different styles, different source videos and experimented with the hyper-parameters to showcase the videos in the report. The videos were usually generated in the background while we wrote the report. The report took quite a lot of effort to write, in part because we had implemented various techniques that all needed to be explained in detail. It was also laborious as we did a significant amount of research to write a solid section on earlier work within the field. Some time was also spent refactoring and standardizing code that would be a part of the delivery.
