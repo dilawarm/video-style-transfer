@@ -32,7 +32,7 @@ The purpose of this project is to compare existing ways of implementing video st
   * Here we define the style of an image as a distribution of features. Then we use the Wasserstein metric as a difference between the different distributions. This representation gives us a more visually pleasing result. The computation of the Wasserstein metric is computationally expensive, thus resulting in longer runtimes.
   * We combined this algorithm with a temporal constraint loss function so that the video becomes much more smoother.
   * Example: https://youtu.be/pujUa0c59hI
-* We have also implemented color preservation for preserving the original color of the video, only applying the style.
+* We have also implemented color preservation for preserving the original color of the video, only applying the style. [Gatys](https://arxiv.org/pdf/1606.05897.pdf) _et al_
   * Example: https://youtu.be/5TZCByrMHJs
 
 The end.
