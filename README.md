@@ -29,10 +29,10 @@ The purpose of this project is to compare existing ways of implementing video st
   * We combined this algorithm with Instance normalization to speed up the optimization, and reduce noise.
   * Example: https://youtu.be/krjY1u1vZc4
 * [code/huang](code/huang) contains the implementation of [Huang](https://arxiv.org/pdf/2007.13010v1.pdf) _et al_ combined with [Ruder](https://arxiv.org/pdf/1604.08610.pdf) _et al_
-  * Here we define the style of an image as a distribution of features by using the Wasserstein metric instead of the Gram matrix. This representation gives us a more visually pleasing result. The computation of the Wasserstein metric is computationally expensive, thus resulting in longer runtimes.
+  * Here we define the style of an image as a distribution of features. Then we use the Wasserstein metric as a difference between the different distributions. This representation gives us a more visually pleasing result. The computation of the Wasserstein metric is computationally expensive, thus resulting in longer runtimes.
   * We combined this algorithm with a temporal constraint loss function so that the video becomes much more smoother.
   * Example: https://youtu.be/pujUa0c59hI
-* We have also implemented color preservation for preserving the original color of the video, only applying the style.
+* We have also implemented color preservation for preserving the original color of the video, only applying the style. [Gatys](https://arxiv.org/pdf/1606.05897.pdf) _et al_
   * Example: https://youtu.be/5TZCByrMHJs
 
 The end.
