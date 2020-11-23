@@ -1,8 +1,7 @@
 \subsection{Results with Wasserstein metric and temporal constraint}
 \label{sec:Results with wasserstein metric}
 Our custom implementation of neural style transfer with temporal constraint and Wasserstein metric to define style loss made the computation a bit slower than with only the temporal constraint, but the stylized video turns out more convincing. \newline
-Resolution used: 1024x576
-The weights for the loss function we used for these videos were 4 for style, 1000 for content, 100 000 000 for temporal
+Resolution used: 1024x576. The weights for the loss function we used for these videos were 4 for style, 1000 for content, 100 000 000 for temporal
 
 \begin{itemize}
 \item{Shrek styled with Udnie: \url{https://youtu.be/5YKvwAM4kdw}}
@@ -13,6 +12,6 @@ The weights for the loss function we used for these videos were 4 for style, 100
 As we can see here, the Wasserstein method provides very nice artistic quality. The combination of this together with the temporal constraint creates a high quality video with little noise. After testing some more and optimizing parameters, we have created some additional result videos using this method:\newline
 \begin{itemize}
     \item{\textbf{Original video: }\url{https://youtu.be/dFv1aX7e3dg}}
-    \item{\textbf{Style:} Starry night - Van Gogh}
+    \item{\textbf{Style:} Starry Night - van Gogh (from Figure \ref{fig:color_preserved_cat})}
     \item{\textbf{Stylized video:} \url{https://youtu.be/pujUa0c59hI}}
 \end{itemize}
