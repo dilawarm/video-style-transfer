@@ -3,18 +3,17 @@ Another feature we implemented in our video style transfer is color preservation
 Our implementation is based on the "Luminance-only transfer" approach described in the paper of Gatys et al. \cite{Gatys:2}. To implement color preservation we just need to add a few components. After we first load our original photo, we save the color profile of the photo. The image is converted from RGB to YUV because the latter format stores color and luminosity information separately. After this we continue the styling process and training until we have the completed stylized picture. Then finally we transfer the color profile (while keeping the luminosity) of the original picture to the stylized picture. Now we have successfully transferred the styling to our picture while preserving the colors from our original photo.\newline
 e.g styling an image with van Gogh's "Starry Night":\newline
 \begin{figure}[!ht]
+
 \begin{center}
 \includegraphics[width=0.3\textwidth]{report/Method/images/style_starry_night.jpg}
-\label{fig:starry night}\newline
 
 \includegraphics[width=0.32\textwidth]{report/Method/images/original_cat.png}
-\label{original cat}
 \includegraphics[width=0.32\textwidth]{report/Method/images/styled_cat.png}
-\label{styled cat}
 \includegraphics[width=0.32\textwidth]{report/Method/images/color_preserved.png}
-\label{color preserved cat}
 \caption{To the left is the original picture, middle is the styled picture, right side is the styled picture with color preservation.}
+\label{fig:color_preserved_cat}
 \end{center}
+
 \end{figure}
 \newpage
 
