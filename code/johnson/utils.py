@@ -1,5 +1,5 @@
-# Koden er basert på # borrowed from https://github.com/lengstrom/fast-style-transfer/blob/master/src/utils.py
-# og
+# This implementation is based on https://github.com/lengstrom/fast-style-transfer/blob/master/src/utils.py
+# and
 # https://github.com/Hvass-Labs/TensorFlow-Tutorials/blob/master/15_Style_Transfer.ipynb
 
 import numpy as np

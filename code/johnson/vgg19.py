@@ -1,4 +1,4 @@
-# Koden er basert på https://github.com/anishathalye/neural-style/blob/master/vgg.py
+# The implementation is based on https://github.com/anishathalye/neural-style/blob/master/vgg.py
 
 import tensorflow as tf
 import numpy as np
@@ -6,6 +6,10 @@ import scipy.io
 
 
 class VGG19:
+    """
+    A class for the loss network
+    """
+
     layers = (
         "conv1_1",
         "relu1_1",

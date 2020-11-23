@@ -1,6 +1,6 @@
 import tensorflow as tf
 import sys
-from utilities import calc_2_moments
+from utilities import calc_mean_covariance
 
 sys.path.append("..")
 from utils.utils import vgg_layers
@@ -28,7 +28,7 @@ class StyleContentModel(tf.keras.models.Model):
         styles_output_layers = []
         if target:
             for style_output in style_outputs:
-                mean, cov = calc_2_moments(style_output)
+                mean, cov = calc_mean_covariance(style_output)
 
                 eigvals, eigvects = tf.linalg.eigh(cov)
                 eigroot_mat = tf.linalg.diag(tf.sqrt(tf.maximum(eigvals, 0.0)))

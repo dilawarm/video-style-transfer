@@ -21,12 +21,15 @@ mpl.rcParams["figure.figsize"] = (12, 12)
 mpl.rcParams["axes.grid"] = False
 
 
-fps = 0.2
+fps = 10.0
 frame_interval = 1 / fps
 loss_tolerance = 0.002
 
 
 def loss_function(image):
+    """
+    Method that calculates style loss and content loss.
+    """
     outputs = extractor(image)
     style_outputs = outputs["style"]
     content_outputs = outputs["content"]
@@ -96,8 +99,8 @@ if __name__ == "__main__":
         "block5_conv1",
     ]
 
-    epochs = 1
-    steps_per_epoch = 1
+    epochs = 10
+    steps_per_epoch = 100
 
     style_weight = 1e-2
     content_weight = 1e4

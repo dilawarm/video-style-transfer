@@ -1,10 +1,12 @@
+# The implementation was based on https://github.com/VinceMarron/style_transfer
+
 import tensorflow as tf
 
 
-def calc_2_moments(tensor):
-    """flattens tensor and calculates sample mean and covariance matrix
-    along last dim (presumably channels)"""
-
+def calc_mean_covariance(tensor):
+    """
+    calculates mean and covariance for a tensor, to be represented as a distribution of features.
+    """
     shape = tf.shape(tensor, out_type=tf.int32)
     n = tf.reduce_prod(shape[:-1])
 
@@ -17,10 +19,10 @@ def calc_2_moments(tensor):
     return mu, cov
 
 
-def calc_l2wass_dist(layer_style_desc, mean_synth, cov_synth):
-    """Calculates (squared) l2-Wasserstein distance between gaussians
-    parameterized by first two moments of style and synth activations"""
-
+def calc_wasserstein_dist(layer_style_desc, mean_synth, cov_synth):
+    """
+    Calculates the wasserstein distance between two distributions
+    """
     mean_stl, tr_cov_stl, root_cov_stl = layer_style_desc
 
     tr_cov_synth = tf.reduce_sum(tf.maximum(tf.linalg.eigh(cov_synth)[0], 0.0))

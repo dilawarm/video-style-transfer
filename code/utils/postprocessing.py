@@ -9,6 +9,9 @@ from utils.utils import tensor_to_image
 
 
 def preserve_colors(stylized_images, yuvs):
+    """
+    Method for preserving color of a video using YUV
+    """
     sty_images = []
 
     for idx in range(len(yuvs)):
@@ -27,6 +30,9 @@ def preserve_colors(stylized_images, yuvs):
 
 
 def convert_to_video(images, frame_interval, name="video"):
+    """
+    Converts array of images to a video
+    """
     frame_array = []
     path_out = "../stylized_videos/" + name + ".mp4"
     size = 0

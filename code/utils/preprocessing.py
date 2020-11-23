@@ -7,6 +7,9 @@ from subprocess import check_output
 
 
 def getFrame(sec, vidcap):
+    """
+    Fetches the frame at a given timestamp (sec)
+    """
     vidcap.set(cv2.CAP_PROP_POS_MSEC, sec * 1000)
     hasFrames, image = vidcap.read()
 
@@ -14,6 +17,9 @@ def getFrame(sec, vidcap):
 
 
 def load_img(path_to_img):
+    """
+    Given a path loads an image, returned in both rgb-tensor and yuv format
+    """
     max_dim = 1024
     img = tf.io.read_file(path_to_img)
     img = tf.image.decode_image(img, channels=3)
@@ -34,6 +40,9 @@ def load_img(path_to_img):
 
 
 def load_video(path_to_video, frame_interval):
+    """
+    Method for loading in the video to an array of frames, and the yuv files for all the frames
+    """
     vidcap = cv2.VideoCapture(path_to_video)
     sec = 0
     count = 0
@@ -58,4 +67,7 @@ def load_video(path_to_video, frame_interval):
 
 
 def clip_0_1(image):
+    """
+    Normalizes each pixel value in an image between 0 and 1.
+    """
     return tf.clip_by_value(image, clip_value_min=0.0, clip_value_max=1.0)

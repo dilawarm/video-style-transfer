@@ -21,9 +21,8 @@ from utils.model import StyleContentModel
 
 mpl.rcParams["figure.figsize"] = (12, 12)
 mpl.rcParams["axes.grid"] = False
-os.environ["TFHUB_MODEL_LOAD_FORMAT"] = "COMPRESSED"
 
-fps = 0.1
+fps = 10.0
 frame_interval = 1.0 / fps
 loss_tolerance = 0.0025
 
@@ -35,9 +34,7 @@ TOL = 0.003
 
 def loss_function(image, idx, c, omega):
     """
-    :param last_image: the previous generated frame
-    :param outputs: Generated image
-    :return: The sum of the style and content loss
+    Loss function with temporal constraint.
     """
     outputs = extractor(image)
     style_outputs = outputs["style"]
@@ -114,14 +111,14 @@ if __name__ == "__main__":
     styled_images = []
     losses = []
     start = time.time()
-    epochs = 15
+    epochs = 10
     steps_per_epoch = 100
 
     opt = tf.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
 
-    style_weight = 4
+    style_weight = 2e-2
     content_weight = 1e4
-    temporal_weight = 1e8
+    temporal_weight = 3e7
 
     total_variation_weight = 30
 
@@ -138,9 +135,9 @@ if __name__ == "__main__":
         c = np.ones(images[idx].shape)
         omega = 0
         if len(styled_images) > 0:
-            flow_dict, backward_flow_dict, average_flow_dict = create_flow_lists(idx)
+            flow_dict, backward_flow_dict, average_flow_dict = create_flow_lists(idx, J)
 
-            c_list = create_c_list(idx, average_flow_dict, backward_flow_dict)
+            c_list = create_c_list(idx, average_flow_dict, backward_flow_dict, J)
 
             omega = {}
             c = {}

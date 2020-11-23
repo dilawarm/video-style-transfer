@@ -25,13 +25,7 @@ BATCH_SIZE = 4
 
 tf.compat.v1.disable_eager_execution()
 
-
-def add_one_dim(image):
-    shape = (1,) + image.shape
-    return np.reshape(image, shape)
-
-
-def main():
+if __name__ == "__main__":
     model_file_path = VGG_MODEL
     vgg_net = vgg19.VGG19(model_file_path)
 
@@ -51,12 +45,12 @@ def main():
         config=tf.compat.v1.ConfigProto(allow_soft_placement=True)
     )
 
-    trainer = style_transfer.Optimizer(
+    trainer = style_transfer.Fit(
         session=sess,
         content_layer_ids=CONTENT_LAYERS_DICT,
         style_layer_ids=STYLE_LAYERS_DICT,
         content_images=content_images,
-        style_image=add_one_dim(style_image),
+        style_image=np.reshape(style_image, (1,) + style_image.shape),
         net=vgg_net,
         num_epochs=NUM_EPOCHS,
         batch_size=BATCH_SIZE,
@@ -70,8 +64,4 @@ def main():
     trainer.train()
 
     sess.close()
-
-
-if __name__ == "__main__":
-    main()
     print("Training finished!")

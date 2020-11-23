@@ -1,13 +1,13 @@
-# Koden er basert på https://github.com/lengstrom/fast-style-transfer/blob/master/src/optimize.py
+# The implementation is based on https://github.com/lengstrom/fast-style-transfer/blob/master/src/optimize.py
 
 import tensorflow as tf
 import numpy as np
 import collections
-import transform
+import network
 import utils
 
 
-class Optimizer:
+class Fit:
     def __init__(
         self,
         content_layer_ids,
@@ -24,7 +24,9 @@ class Optimizer:
         learn_rate,
         save_path,
     ):
-
+        """
+        A class used to train the image transformation network.
+        """
         self.net = net
         self.sess = session
 
@@ -46,7 +48,7 @@ class Optimizer:
 
         self.save_path = save_path
 
-        self.transform = transform.ImageTransformationNetwork()
+        self.transform = network.ImageTransformationNetwork()
 
         self.batch_shape = (self.batch_size, 256, 256, 3)
 
@@ -133,6 +135,9 @@ class Optimizer:
         tf.summary.scalar("L_total", self.L_total)
 
     def total_variation_loss(self, img):
+        """
+        Total variation loss
+        """
         b, h, w, d = img.get_shape()
         tv_y_size = (h - 1) * w * d
         tv_x_size = h * (w - 1) * d
@@ -144,6 +149,9 @@ class Optimizer:
         return loss
 
     def train(self):
+        """
+        Method for training the network
+        """
         global_step = tf.compat.v1.train.get_or_create_global_step()
 
         trainable_variables = tf.compat.v1.trainable_variables()
@@ -197,7 +205,9 @@ class Optimizer:
         _ = saver.save(self.sess, self.save_path + "/final.ckpt")
 
     def gram_matrix(self, tensor, shape=None):
-
+        """
+        Method for returning gram matrix of a tensor.
+        """
         if shape is not None:
             B = shape[0]
             HW = shape[1]

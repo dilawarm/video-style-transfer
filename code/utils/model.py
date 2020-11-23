@@ -7,6 +7,10 @@ from utils.utils import gram_matrix, vgg_layers
 
 
 class StyleContentModel(tf.keras.models.Model):
+    """
+    Class for extracting features from a given input image defined by the layers in the VGG network
+    """
+
     def __init__(self, style_layers, content_layers):
         super(StyleContentModel, self).__init__()
         self.vgg = vgg_layers(style_layers + content_layers)
@@ -16,7 +20,6 @@ class StyleContentModel(tf.keras.models.Model):
         self.vgg.trainable = False
 
     def call(self, inputs):
-        "Expects float input in [0,1]"
         inputs = inputs * 255.0
         preprocessed_input = tf.keras.applications.vgg19.preprocess_input(inputs)
         outputs = self.vgg(preprocessed_input)

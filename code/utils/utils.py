@@ -4,6 +4,9 @@ import PIL
 
 
 def vgg_layers(layer_names):
+    """
+    Extracts the layers from the VGG-19 CNN specified in layer_names and returns the model.
+    """
     vgg = tf.keras.applications.VGG19(include_top=False, weights="imagenet")
     vgg.trainable = False
 
@@ -14,6 +17,9 @@ def vgg_layers(layer_names):
 
 
 def high_pass_x_y(image):
+    """
+    Extracts high frequency artifacts from image
+    """
     x_var = image[:, :, 1:, :] - image[:, :, :-1, :]
     y_var = image[:, 1:, :, :] - image[:, :-1, :, :]
 
@@ -21,6 +27,9 @@ def high_pass_x_y(image):
 
 
 def gram_matrix(input_tensor):
+    """
+    calculates and returns the gram-matrix of a tf tensor
+    """
     result = tf.linalg.einsum("bijc,bijd->bcd", input_tensor, input_tensor)
     input_shape = tf.shape(input_tensor)
     num_locations = tf.cast(input_shape[1] * input_shape[2], tf.float32)
@@ -28,11 +37,17 @@ def gram_matrix(input_tensor):
 
 
 def total_variation_loss(image):
+    """
+    calculates total variation loss on an image
+    """
     x_deltas, y_deltas = high_pass_x_y(image)
     return tf.reduce_sum(tf.abs(x_deltas)) + tf.reduce_sum(tf.abs(y_deltas))
 
 
 def tensor_to_image(tensor):
+    """
+    converts a tensor to an image using the PIL library
+    """
     tensor = tensor * 255
     tensor = np.array(tensor, dtype=np.uint8)
     if np.ndim(tensor) > 3:
@@ -42,6 +57,9 @@ def tensor_to_image(tensor):
 
 
 def imshow(image, title=None):
+    """
+    prints out an image
+    """
     if len(image.shape) > 3:
         image = tf.squeeze(image, axis=0)
 
@@ -51,6 +69,9 @@ def imshow(image, title=None):
 
 
 def warp_flow(img, flow):
+    """
+    Warps an image given its flow values
+    """
     h, w = flow.shape[:2]
     flow = -flow
     flow[:, :, 0] += np.arange(w)
@@ -60,6 +81,9 @@ def warp_flow(img, flow):
 
 
 def create_average_flow(flow, backward_flow):
+    """
+    Calculates the average flow function given flow and backward flow.
+    """
     average_flow = np.zeros(flow.shape)
     print(average_flow.shape)
     for x in range(len(flow[0])):
@@ -74,6 +98,9 @@ def create_average_flow(flow, backward_flow):
 
 
 def create_c_matrix(idx, j, average_flow, backward_flow):
+    """
+    Calculates the c matrix between image idx and image idx - j, given the average flow and backward flow.
+    """
     c = np.ones(images[idx - j].shape)
     for x in range(len(average_flow[0])):
         for y in range(len(average_flow[0][x])):
@@ -91,7 +118,10 @@ def create_c_matrix(idx, j, average_flow, backward_flow):
     return c
 
 
-def create_flow_lists(idx):
+def create_flow_lists(idx, J):
+    """
+    calculates and returns all the flow functions to use in c-matrix based on the elements in J
+    """
     flow_list = {}
     backward_flow_list = {}
     average_flow_list = {}
@@ -110,7 +140,10 @@ def create_flow_lists(idx):
     return flow_list, backward_flow_list, average_flow_list
 
 
-def create_c_list(idx, average_flow_list, backward_flow_list):
+def create_c_list(idx, average_flow_list, backward_flow_list, J):
+    """
+    Creates and returns all the c values for the given image idx, using the produced flow-functions and specified long term frames in J
+    """
     c_list = {}
     for j in J:
         if idx - j < 0:
@@ -121,6 +154,9 @@ def create_c_list(idx, average_flow_list, backward_flow_list):
 
 
 def create_c_long(idx, j, c_list):
+    """
+    creates and returns the value of c_long between frame idx and frame idx - j, using the list of c-matrixes
+    """
     sum = np.zeros(c_list[j].shape)
     for k in J:
         if k == j:

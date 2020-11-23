@@ -1,13 +1,19 @@
-# Koden er basert på https://github.com/lengstrom/fast-style-transfer/blob/master/src/transform.py
+# Implementasjonen er basert på https://github.com/lengstrom/fast-style-transfer/blob/master/src/transform.py
 
 import tensorflow as tf
 
 
 class ImageTransformationNetwork:
     def __init__(self):
+        """
+        A class for image transformation network
+        """
         self.reuse = None
 
     def net(self, image):
+        """
+        A method for returning the styled image from the network
+        """
         image_p = self.reflection_padding(image)
         conv1 = self.conv_layer(image_p, 32, 9, 1, name="conv1")
         conv2 = self.conv_layer(conv1, 64, 3, 2, name="conv2")

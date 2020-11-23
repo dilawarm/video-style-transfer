@@ -36,7 +36,7 @@ def convert_to_video(images):
     out.release()
 
 
-def main():
+if __name__ == "__main__":
     video = VideoFileClip(CONTENT, audio=False)
     styled = []
 
@@ -79,7 +79,3 @@ def main():
 
     print(f"Execution time {end_time - start_time}")
     print("The video has been styled!")
-
-
-if __name__ == "__main__":
-    main()

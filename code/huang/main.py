@@ -13,7 +13,7 @@ from subprocess import check_output
 
 import sys
 
-from utilities import calc_2_moments, calc_l2wass_dist
+from utilities import calc_mean_covariance, calc_wasserstein_distance
 from model import StyleContentModel
 
 sys.path.append("..")
@@ -24,9 +24,8 @@ from utils.utils import tensor_to_image, create_flow_lists, create_c_list, warp_
 
 mpl.rcParams["figure.figsize"] = (12, 12)
 mpl.rcParams["axes.grid"] = False
-os.environ["TFHUB_MODEL_LOAD_FORMAT"] = "COMPRESSED"
 
-fps = 0.1
+fps = 10.0
 frame_interval = 1.0 / fps
 loss_tolerance = 0.0025
 
@@ -37,14 +36,19 @@ TOL = 0.003
 
 
 def loss_function(image, idx, c, omega):
+    """
+    Method that calculates style loss, content loss and temporal loss.
+    """
     outputs = extractor(image)
     style_outputs = outputs["style"]
     content_outputs = outputs["content"]
 
     style_losses = []
     for name in style_outputs.keys():
-        img_mean, img_cov = calc_2_moments(style_outputs[name])
-        style_losses.append(calc_l2wass_dist(style_targets[name], img_mean, img_cov))
+        img_mean, img_cov = calc_mean_covariance(style_outputs[name])
+        style_losses.append(
+            calc_wasserstein_distance(style_targets[name], img_mean, img_cov)
+        )
 
     style_loss = tf.add_n(style_losses)
     style_loss *= style_weight / num_style_layers
@@ -117,14 +121,14 @@ if __name__ == "__main__":
     styled_images = []
     losses = []
     start = time.time()
-    epochs = 1
-    steps_per_epoch = 1
+    epochs = 10
+    steps_per_epoch = 100
 
     opt = tf.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
 
     style_weight = 4
     content_weight = 1e4
-    temporal_weight = 1e8
+    temporal_weight = 3e7
 
     total_variation_weight = 30
 
@@ -141,9 +145,9 @@ if __name__ == "__main__":
         c = np.ones(images[idx].shape)
         omega = 0
         if len(styled_images) > 0:
-            flow_dict, backward_flow_dict, average_flow_dict = create_flow_lists(idx)
+            flow_dict, backward_flow_dict, average_flow_dict = create_flow_lists(idx, J)
 
-            c_list = create_c_list(idx, average_flow_dict, backward_flow_dict)
+            c_list = create_c_list(idx, average_flow_dict, backward_flow_dict, J)
 
             omega = {}
             c = {}
